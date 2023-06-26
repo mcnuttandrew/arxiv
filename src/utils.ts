@@ -31,7 +31,7 @@ export async function bustCache() {
 
 const query = () =>
   fetch(
-    "http://export.arxiv.org/api/query?search_query=cat:cs.HC&sortBy=submittedDate&sortOrder=descending&start=0&max_results=100"
+    "https://export.arxiv.org/api/query?search_query=cat:cs.HC&sortBy=submittedDate&sortOrder=descending&start=0&max_results=100"
   ).then((x) => x.text());
 
 export type ArxivItem = {
