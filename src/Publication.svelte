@@ -20,7 +20,7 @@
     abstract ({abstractOpen ? "-" : "+"})
   </div>
   {#if abstractOpen}
-    <div class="text-xs" transition:slide>
+    <div class="text-sm" transition:slide>
       {item.abstract}
     </div>
   {/if}

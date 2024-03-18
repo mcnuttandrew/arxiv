@@ -6,7 +6,8 @@
   import TailwindCss from "./TailwindCSS.svelte";
 
   let arxivItems: ArxivItem[] = [];
-  let loading: Boolean = true;
+  let state: "loading" | "loaded" | "error" = "loading";
+  let error: string | null = null;
   const dayMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const monthMap = [
     "Jan",
@@ -23,10 +24,15 @@
     "Dev",
   ];
   const buildFeed = () =>
-    cacheFetch().then((text) => {
-      loading = false;
-      arxivItems = xmlToEntries(text);
-    });
+    cacheFetch()
+      .then((text) => {
+        state = "loaded";
+        arxivItems = xmlToEntries(text);
+      })
+      .catch((e) => {
+        state = "error";
+        error = e.message;
+      });
   onMount(() => buildFeed());
   $: groups = arxivItems.reduce((acc, item) => {
     acc[item.date] = (acc[item.date] || []).concat(item);
@@ -44,19 +50,21 @@
     <div>HCI Reader</div>
     <button
       on:click={() => {
-        loading = true;
+        state = "loading";
         bustCache().then(buildFeed);
       }}
     >
       Hard Refresh
     </button>
   </nav>
-  {#if loading}
+  {#if state === "loading"}
     <h1
       class="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent text-5xl font-black"
     >
       LOADING
     </h1>
+  {:else if state === "error"}
+    <h1 class="text-5xl font-black text-red-500">{error}</h1>
   {:else}
     <div class="w-full flex flex-col px-2 py-8">
       {#each days as day}
