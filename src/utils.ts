@@ -24,6 +24,18 @@ export async function cacheFetch() {
   return result;
 }
 
+export function getTargetArea(): string {
+  const area = localStorage.getItem("simpleReaderTargetArea");
+  if (area) {
+    return area;
+  }
+  return "cs.HC";
+}
+
+export function setTargetArea(area: string): void {
+  localStorage.setItem("simpleReaderTargetArea", area);
+}
+
 export async function bustCache() {
   await del(cacheCheckKey);
   await del(cacheKey);
@@ -31,7 +43,7 @@ export async function bustCache() {
 
 const query = () =>
   fetch(
-    "https://export.arxiv.org/api/query?search_query=cat:cs.HC&sortBy=submittedDate&sortOrder=descending&start=0&max_results=100"
+    `https://export.arxiv.org/api/query?search_query=cat:${getTargetArea()}&sortBy=submittedDate&sortOrder=descending&start=0&max_results=100`
   ).then((x) => x.text());
 
 export type ArxivItem = {

@@ -1,6 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { cacheFetch, type ArxivItem, xmlToEntries, bustCache } from "./utils";
+  import {
+    cacheFetch,
+    type ArxivItem,
+    xmlToEntries,
+    bustCache,
+    setTargetArea,
+    getTargetArea,
+  } from "./utils";
   import Publication from "./Publication.svelte";
 
   import TailwindCss from "./TailwindCSS.svelte";
@@ -39,23 +46,53 @@
     return acc;
   }, {});
   $: days = Object.keys(groups).sort().reverse();
+
+  let menuOpen = false;
+  const fields = {
+    "cs.PL": { long: "Programming Languages", short: "PL" },
+    "cs.HC": { long: "Human-Computer Interaction", short: "HCI" },
+  };
+  $: targetArea = getTargetArea();
 </script>
 
 <TailwindCss />
 
 <main class="w-full h-full flex flex-col items-center">
-  <nav
-    class="w-full bg-black text-white flex flex-row justify-between px-2 py-1 text-2xl"
-  >
-    <div>HCI Reader</div>
-    <button
-      on:click={() => {
-        state = "loading";
-        bustCache().then(buildFeed);
-      }}
-    >
-      Hard Refresh
-    </button>
+  <nav class="w-full bg-black text-white px-2 py-1 text-2xl">
+    <div class="flex flex-row justify-between">
+      <button
+        on:click={() => {
+          menuOpen = !menuOpen;
+        }}
+      >
+        {fields[targetArea].short} Reader
+      </button>
+      <button
+        on:click={() => {
+          state = "loading";
+          bustCache().then(buildFeed);
+        }}
+      >
+        Hard Refresh
+      </button>
+    </div>
+    {#if menuOpen}
+      <div class="flex flex-col">
+        {#each Object.keys(fields) as field}
+          <button
+            on:click={() => {
+              setTargetArea(field);
+              targetArea = field;
+              state = "loading";
+              bustCache().then(buildFeed);
+              menuOpen = false;
+            }}
+          >
+            {fields[field].long}
+          </button>
+        {/each}
+      </div>
+    {/if}
   </nav>
   {#if state === "loading"}
     <h1
